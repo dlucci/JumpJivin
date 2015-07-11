@@ -1,6 +1,6 @@
 apply plugin: 'java'
 
-sourceCompatibility = 1.5
+sourceCompatibility = 1.7
 version = '1.0'
 
 repositories {
@@ -10,6 +10,9 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
+    compile files('libs/jython-standalone-2.7.0.jar')
+    compile files('libs/slf4j-nop-1.7.12.jar')
+    compile 'com.gravity:goose:2.1.22'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
     compile 'com.squareup.okhttp:okhttp:2.0.0'
