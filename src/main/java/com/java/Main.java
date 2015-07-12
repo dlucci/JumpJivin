@@ -55,8 +55,12 @@ public class Main implements Runnable{
 
         List<String> summary = new PyTeaser().SummarizeUrl("http://nesn.com/2015/07/clay-buchholzs-injury-a-potentially-troubling-development-for-red-sox/");
 
-        for(String s: summary){
-            System.out.print(s + " ");
+        int thirds = summary.size() / 3;
+
+        for(int x = 0; x < summary.size(); x++){
+            System.out.print(summary.get(x) + " ");
+            if(x%thirds == 0)
+                System.out.println();
         }
 
         System.out.println("Success");

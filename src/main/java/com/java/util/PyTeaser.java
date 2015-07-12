@@ -77,7 +77,6 @@ public class PyTeaser {
 
     public List<String> SummarizeUrl(String url){
 
-
         Article article = grabLink(url);
 
         if(article == null || article.cleanedArticleText() == null || article.title() == null)
@@ -170,7 +169,7 @@ public class PyTeaser {
 
     private double getSecondValue(TreeMap<String, Double> treeMap){
         Set<String> keys = treeMap.keySet();
-        Double[] scores = (Double[]) keys.toArray();
+        String[] scores = (String[]) keys.toArray(new String[keys.size()]);
         return treeMap.get(scores[1]);
     }
 
@@ -314,7 +313,7 @@ public class PyTeaser {
 
     private String[] split_words(String article) {
 
-        String[] words = article.split(" ");
+        String[] words = article.split("[^\\w ]");
 
         for(int x = 0; x < words.length; x++){
             words[x] = words[x].trim();
@@ -326,9 +325,12 @@ public class PyTeaser {
 
     private String[] split_sentences(String text){
 
-        String regex = "[?!.\"]";
+        String regex = "[?!.]";
 
         String[] split_text = text.split(regex);
+
+        for(int x = 0; x < split_text.length; x++)
+            System.out.println(split_text[x]);
 
         for(int x = 0; x < split_text.length; x++){
             split_text[x] = StringUtils.stripStart(split_text[x], " ");
