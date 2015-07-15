@@ -8,6 +8,7 @@ import com.java.model.InnerData;
 import com.java.model.Response;
 import com.java.networking.RedditService;
 import com.java.util.PyTeaser;
+import org.apache.commons.lang.StringUtils;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.util.PythonInterpreter;
@@ -17,6 +18,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by derlucci on 7/9/15.
@@ -46,22 +49,7 @@ public class Main implements Runnable{
 
         InnerData topScoreToday = childrens.get(0).data;  //top scoring article from today
 
-        /*PythonInterpreter interpreter = new PythonInterpreter();
-
-        interpreter.execfile("/Library/Python/2.7/site-packages/pyteaser.py");
-        PyObject function = interpreter.get("SummarizeUrl");
-        interpreter.execfile("/Library/Python/2.7/site-packages/goose/__init__.py");
-        PyObject result = function.__call__(new PyString("http://neo4j.com/docs/stable/introduction-pattern.html"));*/
-
         List<String> summary = new PyTeaser().SummarizeUrl("http://nesn.com/2015/07/clay-buchholzs-injury-a-potentially-troubling-development-for-red-sox/");
-
-        int thirds = summary.size() / 3;
-
-        for(int x = 0; x < summary.size(); x++){
-            System.out.print(summary.get(x) + " ");
-            if(x%thirds == 0)
-                System.out.println();
-        }
 
         System.out.println("Success");
      }

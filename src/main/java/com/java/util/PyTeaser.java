@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -104,11 +105,24 @@ public class PyTeaser {
         }
 
         Map<String, Double> ranks = score(sentences, titleWords, keys);
-        Set<String> words = ranks.keySet();
 
-        for(String s: words){
-            summaries.add(s);
+       /* for(Map.Entry<String, Double> entry : ranks.entrySet()){
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }*/
+        ValueComparator vc = new ValueComparator(ranks);
+        TreeMap<String, Double> sorted = new TreeMap<>(vc);
+
+        sorted.putAll(ranks);
+
+        int x = 0;
+        for(Map.Entry<String, Double> entry : sorted.entrySet()){
+            if(x < 5){
+                summaries.add(entry.getKey());
+                x++;
+            } else
+                break;;
         }
+
 
         return summaries;
     }
@@ -119,12 +133,28 @@ public class PyTeaser {
 
         Map<String, Double> ranks = new HashMap<>();
 
+        List<String> keywords = new ArrayList<>();
+        for(Map.Entry<String, Double> entry : keys.entrySet()){
+            keywords.add(entry.getKey());
+        }
+
         for(int x = 0; x < senSize; x++){
-            double title_feature = title_score(titleWords, sentences);
-            double sentenceLength = length_score(sentences);
+
+            for(String s : keywords){
+                System.out.print(keywords + " ");
+            }
+            System.out.println();
+
+            String[] splitty = split_words(sentences[x]);
+
+            double title_feature = title_score(titleWords, splitty);
+
+            double sentenceLength = length_score(splitty);
             double sentencePosition = sentence_position(x+1, senSize);
-            double sbsFeature = sbs(sentences, keys);
-            double dbsFeature = dbs(sentences, keys);
+            double sbsFeature = sbs(splitty, keys);
+            //System.out.println(sbsFeature);
+
+            double dbsFeature = dbs(splitty, keys);
             double frequency = (sbsFeature + dbsFeature) / 2.0 * 10.0;
             double totalScore = (title_feature * 1.5 + frequency*2.0 + sentenceLength*1.0 + sentencePosition*1.0) / 4.0;
 
@@ -176,14 +206,27 @@ public class PyTeaser {
     private double sbs(String[] sentences, TreeMap<String, Double> keys) {
 
         double score = 0.0;
+
         if(sentences.length == 0)
             return 0.0;
 
         Set<String> keywords = keys.keySet();
-        for(String s: sentences){
-            if(keywords.contains(s))
-                score+=keys.get(s);
+
+        for(String s : keywords){
+            System.out.print(s + " ");
         }
+        System.out.println();
+
+        for(int x = 0 ; x<sentences.length ; x++){
+            sentences[x] = sentences[x].trim();
+            if(keywords.contains(sentences[x]))
+                score+=keys.get(sentences[x]);
+        }
+
+/*        for(int x = 0 ; x < sentences.length; x++)
+            System.out.print(sentences[x] + " ");
+
+        System.out.println();*/
 
         return (1.0 / Math.abs(sentences.length) * score)/10.0;
     }
@@ -222,20 +265,18 @@ public class PyTeaser {
 
     private double title_score(String[] titleWords, String[] sentences){
 
-        boolean cleanRun = false;
         List<String> goodTitle = new ArrayList<>();
         List<String> stopList = Arrays.asList(stopWords);
         for(int x = 0; x < titleWords.length; x++){
-            cleanRun = true;
-            if(stopList.contains(titleWords[x])){
+            if(!stopList.contains(titleWords[x])){
                 goodTitle.add(titleWords[x]);
             }
         }
 
         double count = 0.0;
 
-        for(String s: goodTitle){
-            if(!stopList.contains(s) && goodTitle.contains(s)){
+        for(int x = 0; x < sentences.length; x++){
+            if(!stopList.contains(sentences[x]) && goodTitle.contains(sentences[x])){
                 count += 1.0;
             }
         }
@@ -243,6 +284,12 @@ public class PyTeaser {
         if(goodTitle.size() == 0)
             return 0.0;
 
+
+        /*for(int x = 0 ; x < sentences.length; x++){
+            System.out.print(sentences[x] + " ");
+        }
+
+        System.out.println(count/goodTitle.size());*/
 
         return count/goodTitle.size();
     }
@@ -260,7 +307,6 @@ public class PyTeaser {
          * Really do not like the way this is being done.
          * Will do an optimization after this is working
          */
-        boolean cleanRun = false;
 
         Map<String, Double> wordFreq = new HashMap<>();
         ValueComparator vc = new ValueComparator(wordFreq);
@@ -280,21 +326,38 @@ public class PyTeaser {
 
         sortedHist.putAll(wordFreq);
 
-        int minSize = Math.min(10, sortedHist.size());
+        /*for(Map.Entry<String, Double> item : sortedHist.entrySet()){
+            System.out.println(item.getKey() + " : " + item.getValue());
+        }*/
 
-        Iterator i = sortedHist.entrySet().iterator();
+        int minSize = Math.min(10, sortedHist.size());
+        int x = 0;
+
+        Map<String, Double> keywords = new HashMap<>();
+        for(Map.Entry<String, Double> item : sortedHist.entrySet()){
+            if(x < minSize) {
+                keywords.put(item.getKey(), item.getValue());
+                x++;
+            }else
+                break;
+        }
+
 
         TreeMap<String, Double> submap = new TreeMap<>();
 
-        int x = 0;
-
-        while(i.hasNext() && x < minSize){
-            Map.Entry entry = (Map.Entry)i.next();
-            double numerator = (Double)entry.getValue();
+       for(Map.Entry<String, Double> entry : keywords.entrySet()){
+            double numerator = entry.getValue();
             double articleScore = (numerator*1.0)/numWords;
-            submap.put((String) entry.getKey(), articleScore * 1.5 + 1);
-            x++;
+
+            submap.put( entry.getKey(), (articleScore * 1.5) + 1);
         }
+
+        /*for(Map.Entry<String, Double> item : submap.entrySet()) {
+            String key = item.getKey();
+            Double value = item.getValue();
+            System.out.println(key + " : " + value);
+
+        }*/
 
         return submap;
     }
@@ -313,30 +376,73 @@ public class PyTeaser {
 
     private String[] split_words(String article) {
 
-        String[] words = article.split("[^\\w ]");
+        /**
+         * Really don't like this.  Once this is stable,
+         * create a regex to encapsulate this
+         */
 
-        for(int x = 0; x < words.length; x++){
+        article = article.replace('?', '\0');
+        article = article.replace('.', '\0');
+        article = article.replace('!', '\0');
+        article = article.replace('’', '\0');
+        article = article.replace('"', '\0');
+        article = article.replace('(', '\0');
+        article = article.replace(')', '\0');
+        article = article.replace(',', '\0');
+        article = article.replace('—', '\0');
+        article = article.replace('-', '\0');
+        article = article.replace('\n', '\0');
+        article = article.replace('“', '\0');
+        article = article.replace('”', '\0');
+        article = article.replace('\r', '\0');
+
+        String[] words = article.toLowerCase().split(" ");
+
+        List<String> retWords = new ArrayList<>();
+
+        for(int x = 0; x < words.length /* * 2*/; x++) {
             words[x] = words[x].trim();
-            words[x] = words[x].toLowerCase();
+            if(!words[x].isEmpty()) {
+                retWords.add(words[x]);
+            }
         }
 
-        return words;
+        String[] arrWords = (String[])retWords.toArray(new String[retWords.size()]);
+
+        return arrWords;
     }
 
     private String[] split_sentences(String text){
 
-        String regex = "[?!.]";
+        String regex = "(?![A-Z])((?<=[?.!])|(?=[?.!])\"?)(?=\\s+\"?[A-Z])";
 
-        String[] split_text = text.split(regex);
-
-        for(int x = 0; x < split_text.length; x++)
-            System.out.println(split_text[x]);
-
+        String[] split_text = text.split(regex.toString());
         for(int x = 0; x < split_text.length; x++){
             split_text[x] = StringUtils.stripStart(split_text[x], " ");
         }
 
         return split_text;
+    }
+
+    private String sanitize(String text) {
+
+        /*text = text.replace('?', '\0');
+        text = text.replace('.', '\0');
+        text = text.replace('!', '\0');*/
+        text = text.replace('’', '\0');
+        text = text.replace('"', '\0');
+        text = text.replace('(', '\0');
+        text = text.replace(')', '\0');
+        text = text.replace(',', '\0');
+        text = text.replace('—', '\0');
+        text = text.replace('-', '\0');
+        text = text.replace('“', '\0');
+        text = text.replace('”', '\0');
+        text = text.replace('\r', '\0');
+
+        //System.out.println(text);
+           
+        return text;
     }
 
     public Article grabLink(String url){
@@ -357,9 +463,9 @@ public class PyTeaser {
         @Override
         public int compare(String o1, String o2) {
             if(values.get(o1) >= values.get(o2)){
-                return 1;
-            } else
                 return -1;
+            } else
+                return 1;
         }
     }
 }
