@@ -51,6 +51,11 @@ public class Main implements Runnable{
 
         List<String> summary = new PyTeaser().SummarizeUrl("http://nesn.com/2015/07/clay-buchholzs-injury-a-potentially-troubling-development-for-red-sox/");
 
+        for(String s : summary){
+            s = s.replace('\n', '\0');
+                System.out.println(s);
+        }
+
         System.out.println("Success");
      }
 }

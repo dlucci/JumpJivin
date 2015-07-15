@@ -99,16 +99,12 @@ public class PyTeaser {
         String[] titleWords = split_words(title);
 
         if(sentences.length <= 5) {
-
             List<String> retVal = Arrays.asList(sentences);
             return retVal;
         }
 
         Map<String, Double> ranks = score(sentences, titleWords, keys);
 
-       /* for(Map.Entry<String, Double> entry : ranks.entrySet()){
-            System.out.println(entry.getKey() + " : " + entry.getValue());
-        }*/
         ValueComparator vc = new ValueComparator(ranks);
         TreeMap<String, Double> sorted = new TreeMap<>(vc);
 
@@ -134,16 +130,13 @@ public class PyTeaser {
         Map<String, Double> ranks = new HashMap<>();
 
         List<String> keywords = new ArrayList<>();
+        List<Double> values = new ArrayList<>();
         for(Map.Entry<String, Double> entry : keys.entrySet()){
             keywords.add(entry.getKey());
+            values.add(entry.getValue());
         }
 
         for(int x = 0; x < senSize; x++){
-
-            for(String s : keywords){
-                System.out.print(keywords + " ");
-            }
-            System.out.println();
 
             String[] splitty = split_words(sentences[x]);
 
@@ -151,10 +144,8 @@ public class PyTeaser {
 
             double sentenceLength = length_score(splitty);
             double sentencePosition = sentence_position(x+1, senSize);
-            double sbsFeature = sbs(splitty, keys);
-            //System.out.println(sbsFeature);
-
-            double dbsFeature = dbs(splitty, keys);
+            double sbsFeature = sbs(splitty, keywords, values);
+            double dbsFeature = dbs(splitty, keywords, values);
             double frequency = (sbsFeature + dbsFeature) / 2.0 * 10.0;
             double totalScore = (title_feature * 1.5 + frequency*2.0 + sentenceLength*1.0 + sentencePosition*1.0) / 4.0;
 
@@ -164,37 +155,47 @@ public class PyTeaser {
         return ranks;
     }
 
-    private double dbs(String[] sentences, TreeMap<String, Double> keys) {
+    private double dbs(String[] sentences, List<String> keywords , List<Double> values) {
 
         if(sentences.length == 0)
             return 0;
 
-        int sum = 0;
+        double sum = 0;
 
-        TreeMap<String, Double> first = new TreeMap<>();
-        TreeMap<String, Double> second = new TreeMap<>();
+        double[] first = new double[2];
+        double[] second = new double[2];
 
-        for(String s: sentences){
-            if(keys.containsKey(s)){
-                if(first.isEmpty()){
-                    first.put(s, keys.get(s));
+        first[0] = -1;
+        first[1] = -1;
+
+        for(int x = 0; x < sentences.length; x++){
+
+            String s = sentences[x];
+
+            if(keywords.contains(s)){
+                double score = values.get(keywords.indexOf(s));
+
+                if(first[0] == -1 && first[1] == -1){
+                    first[0] = x;
+                    first[1] = score;
                 } else {
+                    second[0] = first[0];
+                    second[1] = first[1];
+                    first[0] = x;
+                    first[1] = score;
 
-                    second = first;
-                    first.put(s, keys.get(s));
-                    double diff = first.firstEntry().getValue() - second.firstEntry().getValue();
-                    sum += (getSecondValue(first) * getSecondValue(second)) / (Math.pow(diff, 2));
+                    double diff =  first[0] - second[0];
+                    sum += (first[1] + second[1]) / (Math.pow(diff, 2));
                 }
             }
         }
 
-        Set<String> keywords = keys.keySet();
+        List<String> keys = new ArrayList<>(keywords);
         Set<String > words = new HashSet<>(Arrays.asList(sentences));
-        keywords.retainAll(words);
+        keys.retainAll(words);
 
-        double k = keywords.size() + 1;
-
-        return (1/(k*(k+1.0))*sum);
+       double k = keys.size() + 1;
+       return (1/(k*(k+1.0))*sum);
     }
 
     private double getSecondValue(TreeMap<String, Double> treeMap){
@@ -203,24 +204,23 @@ public class PyTeaser {
         return treeMap.get(scores[1]);
     }
 
-    private double sbs(String[] sentences, TreeMap<String, Double> keys) {
+    private double sbs(String[] sentences, List<String> keywords, List<Double> values) {
 
         double score = 0.0;
 
         if(sentences.length == 0)
             return 0.0;
 
-        Set<String> keywords = keys.keySet();
 
-        for(String s : keywords){
-            System.out.print(s + " ");
-        }
-        System.out.println();
+//        for(String s : keywords){
+//            System.out.print(s + " ");
+//        }
+//        System.out.println();
 
         for(int x = 0 ; x<sentences.length ; x++){
             sentences[x] = sentences[x].trim();
             if(keywords.contains(sentences[x]))
-                score+=keys.get(sentences[x]);
+                score+=values.get(keywords.indexOf(sentences[x]));
         }
 
 /*        for(int x = 0 ; x < sentences.length; x++)
