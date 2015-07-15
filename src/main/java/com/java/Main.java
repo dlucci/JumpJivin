@@ -49,7 +49,7 @@ public class Main implements Runnable{
 
         InnerData topScoreToday = childrens.get(0).data;  //top scoring article from today
 
-        List<String> summary = new PyTeaser().SummarizeUrl("http://nesn.com/2015/07/clay-buchholzs-injury-a-potentially-troubling-development-for-red-sox/");
+        List<String> summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
 
         for(String s : summary){
             s = s.replace('\n', '\0');

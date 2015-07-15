@@ -1,16 +1,11 @@
 package com.java.util;
 
-import apple.laf.JRSUIUtils;
 import com.gravity.goose.Article;
 import com.gravity.goose.Configuration;
 import com.gravity.goose.Goose;
-import com.java.model.InnerData;
 import org.apache.commons.lang.StringUtils;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by derlucci on 7/11/15.
@@ -198,12 +193,6 @@ public class PyTeaser {
        return (1/(k*(k+1.0))*sum);
     }
 
-    private double getSecondValue(TreeMap<String, Double> treeMap){
-        Set<String> keys = treeMap.keySet();
-        String[] scores = (String[]) keys.toArray(new String[keys.size()]);
-        return treeMap.get(scores[1]);
-    }
-
     private double sbs(String[] sentences, List<String> keywords, List<Double> values) {
 
         double score = 0.0;
@@ -212,21 +201,12 @@ public class PyTeaser {
             return 0.0;
 
 
-//        for(String s : keywords){
-//            System.out.print(s + " ");
-//        }
-//        System.out.println();
-
         for(int x = 0 ; x<sentences.length ; x++){
             sentences[x] = sentences[x].trim();
             if(keywords.contains(sentences[x]))
                 score+=values.get(keywords.indexOf(sentences[x]));
         }
 
-/*        for(int x = 0 ; x < sentences.length; x++)
-            System.out.print(sentences[x] + " ");
-
-        System.out.println();*/
 
         return (1.0 / Math.abs(sentences.length) * score)/10.0;
     }
@@ -284,13 +264,6 @@ public class PyTeaser {
         if(goodTitle.size() == 0)
             return 0.0;
 
-
-        /*for(int x = 0 ; x < sentences.length; x++){
-            System.out.print(sentences[x] + " ");
-        }
-
-        System.out.println(count/goodTitle.size());*/
-
         return count/goodTitle.size();
     }
 
@@ -326,10 +299,6 @@ public class PyTeaser {
 
         sortedHist.putAll(wordFreq);
 
-        /*for(Map.Entry<String, Double> item : sortedHist.entrySet()){
-            System.out.println(item.getKey() + " : " + item.getValue());
-        }*/
-
         int minSize = Math.min(10, sortedHist.size());
         int x = 0;
 
@@ -351,13 +320,6 @@ public class PyTeaser {
 
             submap.put( entry.getKey(), (articleScore * 1.5) + 1);
         }
-
-        /*for(Map.Entry<String, Double> item : submap.entrySet()) {
-            String key = item.getKey();
-            Double value = item.getValue();
-            System.out.println(key + " : " + value);
-
-        }*/
 
         return submap;
     }
@@ -400,7 +362,7 @@ public class PyTeaser {
 
         List<String> retWords = new ArrayList<>();
 
-        for(int x = 0; x < words.length /* * 2*/; x++) {
+        for(int x = 0; x < words.length ; x++) {
             words[x] = words[x].trim();
             if(!words[x].isEmpty()) {
                 retWords.add(words[x]);
@@ -426,9 +388,6 @@ public class PyTeaser {
 
     private String sanitize(String text) {
 
-        /*text = text.replace('?', '\0');
-        text = text.replace('.', '\0');
-        text = text.replace('!', '\0');*/
         text = text.replace('’', '\0');
         text = text.replace('"', '\0');
         text = text.replace('(', '\0');
@@ -439,8 +398,6 @@ public class PyTeaser {
         text = text.replace('“', '\0');
         text = text.replace('”', '\0');
         text = text.replace('\r', '\0');
-
-        //System.out.println(text);
            
         return text;
     }
@@ -448,7 +405,7 @@ public class PyTeaser {
     public Article grabLink(String url){
 
         Goose goose = new Goose(new Configuration());
-        Article article = goose.extractContent("http://nesn.com/2015/07/clay-buchholzs-injury-a-potentially-troubling-development-for-red-sox/");
+        Article article = goose.extractContent(url);
         return article;
     }
 
