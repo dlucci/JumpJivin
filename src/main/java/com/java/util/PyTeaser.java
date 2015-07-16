@@ -1,11 +1,20 @@
 package com.java.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.gravity.goose.Article;
 import com.gravity.goose.Configuration;
 import com.gravity.goose.Goose;
-import org.apache.commons.lang.StringUtils;
-
-import java.util.*;
 
 /**
  * Created by derlucci on 7/11/15.
@@ -69,7 +78,7 @@ public class PyTeaser {
             "august", "september", "october", "november", "december",
             "government", "police" };
 
-    double ideal = 20.0;
+    final double ideal = 20.0;
 
     public List<String> SummarizeUrl(String url){
 
@@ -150,6 +159,7 @@ public class PyTeaser {
         return ranks;
     }
 
+    // TODO Rename or add documentation on what this method does 
     private double dbs(String[] sentences, List<String> keywords , List<Double> values) {
 
         if(sentences.length == 0)
@@ -324,6 +334,7 @@ public class PyTeaser {
         return submap;
     }
 
+    // TODO Remove this private method if we won't be using this
     private String recreate(String[] strings){
         String retval = new String();
 
@@ -340,7 +351,7 @@ public class PyTeaser {
 
         /**
          * Really don't like this.  Once this is stable,
-         * create a regex to encapsulate this
+         * TODO create a regex to encapsulate this
          */
 
         article = article.replace('?', '\0');
@@ -386,8 +397,8 @@ public class PyTeaser {
         return split_text;
     }
 
+    // TODO Remove this private method if we won't be using this
     private String sanitize(String text) {
-
         text = text.replace('’', '\0');
         text = text.replace('"', '\0');
         text = text.replace('(', '\0');
@@ -398,7 +409,6 @@ public class PyTeaser {
         text = text.replace('“', '\0');
         text = text.replace('”', '\0');
         text = text.replace('\r', '\0');
-           
         return text;
     }
 

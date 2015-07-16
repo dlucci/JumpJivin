@@ -1,25 +1,15 @@
 package com.java;
 
-import com.gravity.goose.Article;
-import com.gravity.goose.Configuration;
-import com.gravity.goose.Goose;
+import java.util.Collections;
+import java.util.List;
+
+import retrofit.RestAdapter;
+
 import com.java.model.Children;
 import com.java.model.InnerData;
 import com.java.model.Response;
 import com.java.networking.RedditService;
 import com.java.util.PyTeaser;
-import org.apache.commons.lang.StringUtils;
-import org.python.core.PyObject;
-import org.python.core.PyString;
-import org.python.util.PythonInterpreter;
-import retrofit.RestAdapter;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by derlucci on 7/9/15.
@@ -27,8 +17,6 @@ import java.util.regex.Pattern;
 public class Main implements Runnable{
 
     public static void main(String[] args){
-        //System.out.println("Hello World");
-
         (new Thread(new Main())).run();
     }
 
