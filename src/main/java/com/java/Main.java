@@ -3,6 +3,9 @@ package com.java;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import retrofit.RestAdapter;
 
 import com.java.model.Children;
@@ -16,6 +19,8 @@ import com.java.util.PyTeaser;
  */
 public class Main implements Runnable{
 
+	final Logger logger = LoggerFactory.getLogger(Main.class);
+	
     public static void main(String[] args){
         (new Thread(new Main())).run();
     }
@@ -25,10 +30,10 @@ public class Main implements Runnable{
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("http://reddit.com")
                 .build();
-        System.out.println("Running");
+        logger.info("Running");
 
         RedditService redditService = restAdapter.create(RedditService.class);
-        System.out.println("Got Data!");
+        logger.info("Got Data!");
         Response response = redditService.getArticles();
 
         List<Children> childrens = response.data.children;
@@ -41,9 +46,9 @@ public class Main implements Runnable{
 
         for(String s : summary){
             s = s.replace('\n', '\0');
-                System.out.println(s);
+            	logger.info(s);
         }
 
-        System.out.println("Success");
+        logger.info("Success");
      }
 }

@@ -1,4 +1,9 @@
+apply plugin: 'application'
 apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+mainClassName = 'com.java.Main'
 
 sourceCompatibility = 1.7
 version = '1.0'
@@ -11,7 +16,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile files('libs/jython-standalone-2.7.0.jar')
-    compile files('libs/slf4j-nop-1.7.12.jar')
     compile 'com.gravity:goose:2.1.22'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
@@ -19,4 +23,5 @@ dependencies {
     compile "org.functionaljava:functionaljava:4.4"
     compile "org.functionaljava:functionaljava-java8:4.4"
     compile "org.functionaljava:functionaljava-quickcheck:4.4"
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
 }
