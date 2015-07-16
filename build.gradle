@@ -1,6 +1,9 @@
+apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+
+mainClassName = 'com.java.Main'
 
 sourceCompatibility = 1.7
 version = '1.0'
