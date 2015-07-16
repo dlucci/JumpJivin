@@ -18,6 +18,10 @@ import com.gravity.goose.Goose;
 
 /**
  * Created by derlucci on 7/11/15.
+ *
+ * This program was written because I was having problems getting PyTeaser (https://github.com/xiaoxu193/PyTeaser/) to
+ * run in java so I ported the code.  I did not come up with any of this logic.  Full credit goes to github.com/xiaoxu194
+ * for that
  */
 public class PyTeaser {
 
@@ -80,6 +84,8 @@ public class PyTeaser {
 
     final double ideal = 20.0;
 
+    final List<String> stopList = Arrays.asList(stopWords);
+
     public List<String> SummarizeUrl(String url){
 
         Article article = grabLink(url);
@@ -140,11 +146,13 @@ public class PyTeaser {
             values.add(entry.getValue());
         }
 
+        List<String> goodTitle = getGoodTitle(titleWords);
+
         for(int x = 0; x < senSize; x++){
 
             String[] splitty = split_words(sentences[x]);
 
-            double title_feature = title_score(titleWords, splitty);
+            double title_feature = title_score(goodTitle, splitty);
 
             double sentenceLength = length_score(splitty);
             double sentencePosition = sentence_position(x+1, senSize);
@@ -253,15 +261,18 @@ public class PyTeaser {
         return 1-Math.abs(ideal - sentences.length)/ideal;
     }
 
-    private double title_score(String[] titleWords, String[] sentences){
-
+    private List<String> getGoodTitle(String[] titleWords){
         List<String> goodTitle = new ArrayList<>();
-        List<String> stopList = Arrays.asList(stopWords);
         for(int x = 0; x < titleWords.length; x++){
             if(!stopList.contains(titleWords[x])){
                 goodTitle.add(titleWords[x]);
             }
         }
+
+        return goodTitle;
+    }
+
+    private double title_score(List<String> goodTitle, String[] sentences){
 
         double count = 0.0;
 
@@ -283,19 +294,11 @@ public class PyTeaser {
 
         int numWords = words.length;
 
-        /**
-         * Strip out "black listed" words
-         */
-        /**
-         * Really do not like the way this is being done.
-         * Will do an optimization after this is working
-         */
 
         Map<String, Double> wordFreq = new HashMap<>();
         ValueComparator vc = new ValueComparator(wordFreq);
         TreeMap<String, Double> sortedHist = new TreeMap<>(vc);
 
-        List<String> stopList = Arrays.asList(stopWords);
         for(int x = 0; x < words.length; x++){
             if(!stopList.contains(words[x])){
                 if(wordFreq.containsKey(words[x])){
@@ -332,19 +335,6 @@ public class PyTeaser {
         }
 
         return submap;
-    }
-
-    // TODO Remove this private method if we won't be using this
-    private String recreate(String[] strings){
-        String retval = new String();
-
-        for(int x = 0; x < strings.length; x++){
-            retval = retval + " " + strings[x];
-        }
-
-        retval = retval.trim();
-
-        return retval;
     }
 
     private String[] split_words(String article) {
@@ -395,21 +385,6 @@ public class PyTeaser {
         }
 
         return split_text;
-    }
-
-    // TODO Remove this private method if we won't be using this
-    private String sanitize(String text) {
-        text = text.replace('’', '\0');
-        text = text.replace('"', '\0');
-        text = text.replace('(', '\0');
-        text = text.replace(')', '\0');
-        text = text.replace(',', '\0');
-        text = text.replace('—', '\0');
-        text = text.replace('-', '\0');
-        text = text.replace('“', '\0');
-        text = text.replace('”', '\0');
-        text = text.replace('\r', '\0');
-        return text;
     }
 
     public Article grabLink(String url){
