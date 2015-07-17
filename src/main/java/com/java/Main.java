@@ -31,9 +31,11 @@ import com.squareup.okhttp.OkHttpClient;
  */
 public class Main implements Runnable{
 	
-	private final static String PROPERTIES_ACCOUNTS = "accounts.properties";
-	private final static String PROPERTIES_ACCOUNTS_USERNAME = "jive.username";
-	private final static String PROPERTIES_ACCOUNTS_PASSWORD = "jive.password";
+	private final static String PROPERTIES_JIVE = "jive.properties";
+	private final static String PROPERTIES_JIVE_ENDPOINT = "jive.endpoint";
+	private final static String PROPERTIES_JIVE_USERNAME = "jive.username";
+	private final static String PROPERTIES_JIVE_PASSWORD = "jive.password";
+	private final static String PROPERTIES_JIVE_DESTINATION = "jive.destination";
 
 	private final static Logger logger = LoggerFactory.getLogger(Main.class);
 	
@@ -44,9 +46,9 @@ public class Main implements Runnable{
     
     // TODO This is for demonstration purposes. Remove me.
     private static void demoProperties() {
-    	Properties accounts = loadProperties(PROPERTIES_ACCOUNTS);
-    	logger.debug("Username: "+accounts.getProperty(PROPERTIES_ACCOUNTS_USERNAME));
-    	logger.debug("Password: "+accounts.getProperty(PROPERTIES_ACCOUNTS_PASSWORD));
+    	Properties accounts = loadProperties(PROPERTIES_JIVE);
+    	logger.debug("Username: "+accounts.getProperty(PROPERTIES_JIVE_USERNAME));
+    	logger.debug("Password: "+accounts.getProperty(PROPERTIES_JIVE_PASSWORD));
     }
     
     private static Properties loadProperties(String propertyName) {
@@ -61,7 +63,9 @@ public class Main implements Runnable{
 
     @Override
     public void run() {
-        RestAdapter restAdapter = new RestAdapter.Builder()
+    	Properties properties = loadProperties(PROPERTIES_JIVE);
+
+    	RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("http://reddit.com")
                 .build();
         logger.info("Running");
@@ -76,18 +80,17 @@ public class Main implements Runnable{
 
         InnerData topScoreToday = childrens.get(0).data;  //top scoring article from today
 
-        String ENDPOINT = "https://rosetta.jiveon.com/api/core/v3/contents";
-
         RestAdapter.Builder builder = new RestAdapter.Builder()
-                .setEndpoint("https://rosetta.jiveon.com")
+                .setEndpoint(properties.getProperty(PROPERTIES_JIVE_ENDPOINT))
                 .setClient(new OkClient(new OkHttpClient())) // use OkHttp
                 .setConverter(new JiveResponseInterceptor(new Gson())) // clean up Response
 
                 .setRequestInterceptor(new RequestInterceptor() { // Add HTTP Authorization Header to each Request
                     @Override
                     public void intercept(RequestFacade request) {
-                        final String username = "";
-                        final String password =  "";
+                    	Properties properties = loadProperties(PROPERTIES_JIVE);
+                        final String username = properties.getProperty(PROPERTIES_JIVE_USERNAME);
+                        final String password =  properties.getProperty(PROPERTIES_JIVE_PASSWORD);
                         final String credentials = username + ":" + password;
                         Base64 base64 = new Base64();
                         String string = "Basic " + base64.encodeToString(credentials.getBytes());
@@ -100,22 +103,24 @@ public class Main implements Runnable{
 
         JiveService jiveService = adapter.create(JiveService.class);
         Content content = new Content();
+        content.parent = properties.getProperty(PROPERTIES_JIVE_DESTINATION);
         content.type = "idea";
-        content.subject = "Test";
+        content.subject = topScoreToday.title;
+        content.visibility = "place";
         Inners inners = new Inners();
         inners.type = "text/utf8";
-        inners.text = "This is a test";
+        inners.text = topScoreToday.url;
         content.content = inners;
         jiveService.postContent(content, new Callback<Void>() {
 
             @Override
             public void success(Void aVoid, retrofit.client.Response response) {
-                System.out.print("win");
+                logger.info("Success.");
             }
 
             @Override
             public void failure(RetrofitError error) {
-                System.out.print("fail");
+                logger.error(error.getMessage());
             }
         });
     }

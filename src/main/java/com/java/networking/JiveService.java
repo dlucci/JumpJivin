@@ -13,7 +13,7 @@ import retrofit.http.Path;
  */
 public interface JiveService {
 
-    @POST("/api/core/v3/contents")
+    @POST("/api/core/v3/contents/")
     void postContent(@Body Content stuff, Callback<Void> cb);
 
 }
