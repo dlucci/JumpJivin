@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import com.java.util.PyTeaser;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,19 @@ public class Main implements Runnable{
 
         InnerData topScoreToday = childrens.get(0).data;  //top scoring article from today
 
+        List<String> summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
+
+        String data = new String();
+        if(summary == null){
+            topScoreToday = childrens.get(1).data;
+            summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
+        }
+
+        for(String s : summary){
+            data = data.concat(s + " ");
+        }
+
+
         RestAdapter.Builder builder = new RestAdapter.Builder()
                 .setEndpoint(properties.getProperty(PROPERTIES_JIVE_ENDPOINT))
                 .setClient(new OkClient(new OkHttpClient())) // use OkHttp
@@ -108,9 +122,9 @@ public class Main implements Runnable{
         content.subject = topScoreToday.title;
         content.visibility = "place";
         Inners inners = new Inners();
-        inners.type = "text/utf8";
-        inners.text = topScoreToday.url;
+        inners.type = "text/html";
+        inners.text = "<a href = \"" + topScoreToday.url + "\">" + data + "</a>";
         content.content = inners;
-        logger.debug("Response:\n"+jiveService.postContent(content));
+        logger.debug("Response:\n" + jiveService.postContent(content));
     }
 }
