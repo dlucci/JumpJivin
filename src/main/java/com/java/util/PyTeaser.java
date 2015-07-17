@@ -256,10 +256,7 @@ public class PyTeaser {
         return 0;
     }
 
-    private double length_score(String[] sentences) {
-
-        return 1-Math.abs(ideal - sentences.length)/ideal;
-    }
+    private double length_score(String[] sentences) {return 1-Math.abs(ideal - sentences.length)/ideal;}
 
     private List<String> getGoodTitle(String[] titleWords){
         List<String> goodTitle = new ArrayList<>();
@@ -293,7 +290,6 @@ public class PyTeaser {
         String[] words = split_words(article);
 
         int numWords = words.length;
-
 
         Map<String, Double> wordFreq = new HashMap<>();
         ValueComparator vc = new ValueComparator(wordFreq);
@@ -400,7 +396,6 @@ public class PyTeaser {
         public ValueComparator(Map<String, Double> values){
             this.values = values;
         }
-
 
         @Override
         public int compare(String o1, String o2) {
