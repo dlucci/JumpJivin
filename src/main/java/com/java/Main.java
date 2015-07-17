@@ -67,11 +67,16 @@ public class Main implements Runnable{
         InnerData topScoreToday = childrens.get(0).data;  //top scoring article from today
 
         List<String> summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
-
-        for(String s : summary){
-            s = s.replace('\n', '\0');
-            	logger.info(s);
+        if (summary != null) {
+        	for(String s : summary){
+                s = s.replace('\n', '\0');
+                	logger.info(s);
+            }
+        } else {
+        	logger.error("URL failed to summarize: "+topScoreToday.url);
         }
+
+        
 
         logger.info("Success");
      }
