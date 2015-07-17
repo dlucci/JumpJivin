@@ -1,5 +1,5 @@
 logs/
-
+src/main/resources/jive.properties
 # Created by https://www.gitignore.io
 
 ### Windows ###
