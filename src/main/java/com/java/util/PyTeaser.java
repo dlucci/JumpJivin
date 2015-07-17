@@ -25,6 +25,7 @@ import com.gravity.goose.Goose;
  */
 public class PyTeaser {
 
+    // keywords
     String[] stopWords = {"-", " ", ",", ".", "a", "e", "i", "o", "u", "t", "about", "above",
             "above", "across", "after", "afterwards", "again", "against", "all",
             "almost", "alone", "along", "already", "also", "although", "always",
@@ -83,28 +84,35 @@ public class PyTeaser {
             "government", "police" };
 
     final double ideal = 20.0;
+    // ideal number of words in sentence = 20. Use this to calculate score later
 
     final List<String> stopList = Arrays.asList(stopWords);
+    // asList returns a fixed sized list, backed as a single array
 
     public List<String> SummarizeUrl(String url){
 
         Article article = grabLink(url);
+        // Gets the name and text of article
 
         if(article == null || article.cleanedArticleText() == null || article.title() == null)
             return null;
 
         List<String> summaries = summarize(article.title(), article.cleanedArticleText());
+        // summarize method parses title and text into strings contained in a tuple list
 
         return summaries;
     }
 
     private List<String> summarize(String title, String article) {
-
+    // Splits title, get keywords, and sentences
+    // if 5 < sentences, return as is (summary = 5 lines)
+    // otherwise, assigns value to score based on length, location, and # keywords
         List<String> summaries = new ArrayList<>();
 
         String[] sentences = split_sentences(article);
 
         TreeMap<String, Double> keys = keywords(article);
+        // consists of keys (string values) and values (double values)
 
         String[] titleWords = split_words(title);
 
@@ -114,11 +122,14 @@ public class PyTeaser {
         }
 
         Map<String, Double> ranks = score(sentences, titleWords, keys);
+    // score is calculated via sentences titleWords and keys within each sentence
+    // To be evaluated later
 
         ValueComparator vc = new ValueComparator(ranks);
         TreeMap<String, Double> sorted = new TreeMap<>(vc);
 
         sorted.putAll(ranks);
+    //  Puts ranked objects into treeMap, then sorts them, generally based on score
 
         int x = 0;
         for(Map.Entry<String, Double> entry : sorted.entrySet()){
@@ -129,11 +140,11 @@ public class PyTeaser {
                 break;;
         }
 
-
         return summaries;
     }
 
     private Map<String, Double> score(String[] sentences, String[] titleWords, TreeMap<String, Double> keys){
+    // calculates the score for each sentence and returns it as a Map
 
         int senSize = sentences.length;
 
@@ -147,6 +158,7 @@ public class PyTeaser {
         }
 
         List<String> goodTitle = getGoodTitle(titleWords);
+        // obtain title of the article (modified)
 
         for(int x = 0; x < senSize; x++){
 
@@ -169,6 +181,13 @@ public class PyTeaser {
 
     // TODO Rename or add documentation on what this method does 
     private double dbs(String[] sentences, List<String> keywords , List<Double> values) {
+    // remember: array = data structure, consists of sequential memory used for storing objects
+        // list = interface, can utilize multiple implementations, not restricted to just an array
+            // requires iterators to traverse
+
+        // Takes in sentences and keywords and gives a score for each keyword based on their occurences
+        // within the sentences
+        // basically does the same thing as dbs? haha
 
         if(sentences.length == 0)
             return 0;
@@ -177,6 +196,7 @@ public class PyTeaser {
 
         double[] first = new double[2];
         double[] second = new double[2];
+        // second keeps track of the last values of first
 
         first[0] = -1;
         first[1] = -1;
@@ -187,10 +207,12 @@ public class PyTeaser {
 
             if(keywords.contains(s)){
                 double score = values.get(keywords.indexOf(s));
+                // pulls out the value found for that keyword
 
                 if(first[0] == -1 && first[1] == -1){
                     first[0] = x;
                     first[1] = score;
+                    // initial input
                 } else {
                     second[0] = first[0];
                     second[1] = first[1];
@@ -199,6 +221,8 @@ public class PyTeaser {
 
                     double diff =  first[0] - second[0];
                     sum += (first[1] + second[1]) / (Math.pow(diff, 2));
+                    // overall value sum is then calculated based on number of occurences
+                    // that this word appears
                 }
             }
         }
@@ -209,10 +233,12 @@ public class PyTeaser {
 
        double k = keys.size() + 1;
        return (1/(k*(k+1.0))*sum);
+        // final score is calculated as such
     }
 
     private double sbs(String[] sentences, List<String> keywords, List<Double> values) {
-
+    // compares words in sentence to keywords.
+        // if word appears, added to score. SBS = score by sentence
         double score = 0.0;
 
         if(sentences.length == 0)
@@ -221,15 +247,19 @@ public class PyTeaser {
 
         for(int x = 0 ; x<sentences.length ; x++){
             sentences[x] = sentences[x].trim();
+            // not too sure as to what trim does...
+
             if(keywords.contains(sentences[x]))
                 score+=values.get(keywords.indexOf(sentences[x]));
+            // scoring is calculated based on location of the keyword(???)
         }
-
 
         return (1.0 / Math.abs(sentences.length) * score)/10.0;
     }
 
     private double sentence_position(int i, int senSize) {
+        // score calculated based on location in sentence(?)
+        // 'i' is the next word's index(?) (pass in x+1 when called, x = the next word in a sentence)
 
         double normalized = i*1.0/senSize;
         if(normalized > 0 && normalized<= 0.1)
@@ -256,13 +286,18 @@ public class PyTeaser {
         return 0;
     }
 
-    private double length_score(String[] sentences) {return 1-Math.abs(ideal - sentences.length)/ideal;}
+    private double length_score(String[] sentences) {
+    // score based on number of sentences found
+        return 1-Math.abs(ideal - sentences.length)/ideal;
+    }
 
     private List<String> getGoodTitle(String[] titleWords){
+    // score based on unique words in the title
         List<String> goodTitle = new ArrayList<>();
         for(int x = 0; x < titleWords.length; x++){
             if(!stopList.contains(titleWords[x])){
                 goodTitle.add(titleWords[x]);
+                // eliminates repeats
             }
         }
 
@@ -286,21 +321,27 @@ public class PyTeaser {
     }
 
     private TreeMap<String, Double> keywords(String article) {
+    // takes in an article and scores the individual words
 
         String[] words = split_words(article);
 
         int numWords = words.length;
 
         Map<String, Double> wordFreq = new HashMap<>();
+        // creates a Hashmap based on words and their frequencies
+
         ValueComparator vc = new ValueComparator(wordFreq);
         TreeMap<String, Double> sortedHist = new TreeMap<>(vc);
+        // treemap based on how word frequency
 
         for(int x = 0; x < words.length; x++){
             if(!stopList.contains(words[x])){
                 if(wordFreq.containsKey(words[x])){
                     wordFreq.put(words[x], wordFreq.get(words[x]) + 1);
+                    // updates words encountered in stopList
                 } else {
                     wordFreq.put(words[x], 1.0);
+                    // adds new word to the list, apperance = 1
                 }
             }
 
@@ -315,6 +356,7 @@ public class PyTeaser {
         for(Map.Entry<String, Double> item : sortedHist.entrySet()){
             if(x < minSize) {
                 keywords.put(item.getKey(), item.getValue());
+                // put method replaces item.getKey's previous value with item.getValue
                 x++;
             }else
                 break;
@@ -340,6 +382,7 @@ public class PyTeaser {
          * TODO create a regex to encapsulate this
          */
 
+        // don't consider punctuation
         article = article.replace('?', '\0');
         article = article.replace('.', '\0');
         article = article.replace('!', '\0');
@@ -356,11 +399,14 @@ public class PyTeaser {
         article = article.replace('\r', '\0');
 
         String[] words = article.toLowerCase().split(" ");
+        // eliminate spaces
 
         List<String> retWords = new ArrayList<>();
 
         for(int x = 0; x < words.length ; x++) {
             words[x] = words[x].trim();
+            // still no idea what trim does...
+
             if(!words[x].isEmpty()) {
                 retWords.add(words[x]);
             }
@@ -369,6 +415,7 @@ public class PyTeaser {
         String[] arrWords = (String[])retWords.toArray(new String[retWords.size()]);
 
         return arrWords;
+        // returns a list of words after they have been modified to reduce non-alphanumerics
     }
 
     private String[] split_sentences(String text){
@@ -384,6 +431,8 @@ public class PyTeaser {
     }
 
     public Article grabLink(String url){
+        // takes in a url and returns an article object, consisting of the article's title and main text
+        // does this using methods from a Goose database
 
         Goose goose = new Goose(new Configuration());
         Article article = goose.extractContent(url);
@@ -391,6 +440,8 @@ public class PyTeaser {
     }
 
     private class ValueComparator implements Comparator<String>{
+        // class that overrides typical compare method
+        // allows string comparison based on scores
 
         private Map<String, Double> values;
         public ValueComparator(Map<String, Double> values){
