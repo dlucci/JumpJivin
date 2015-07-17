@@ -5,16 +5,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import retrofit.Callback;
+import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.OkClient;
 
+import com.google.gson.Gson;
 import com.java.model.Children;
+import com.java.model.Content;
 import com.java.model.InnerData;
+import com.java.model.Inners;
 import com.java.model.Response;
+import com.java.networking.JiveResponseInterceptor;
+import com.java.networking.JiveService;
 import com.java.networking.RedditService;
-import com.java.util.PyTeaser;
+import com.squareup.okhttp.OkHttpClient;
 
 /**
  * Created by derlucci on 7/9/15.
@@ -66,18 +76,47 @@ public class Main implements Runnable{
 
         InnerData topScoreToday = childrens.get(0).data;  //top scoring article from today
 
-        List<String> summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
-        if (summary != null) {
-        	for(String s : summary){
-                s = s.replace('\n', '\0');
-                	logger.info(s);
+        String ENDPOINT = "https://rosetta.jiveon.com/api/core/v3/contents";
+
+        RestAdapter.Builder builder = new RestAdapter.Builder()
+                .setEndpoint("https://rosetta.jiveon.com")
+                .setClient(new OkClient(new OkHttpClient())) // use OkHttp
+                .setConverter(new JiveResponseInterceptor(new Gson())) // clean up Response
+
+                .setRequestInterceptor(new RequestInterceptor() { // Add HTTP Authorization Header to each Request
+                    @Override
+                    public void intercept(RequestFacade request) {
+                        final String username = "";
+                        final String password =  "";
+                        final String credentials = username + ":" + password;
+                        Base64 base64 = new Base64();
+                        String string = "Basic " + base64.encodeToString(credentials.getBytes());
+                        request.addHeader("Accept", "application/json");
+                        request.addHeader("Authorization", string);
+                    }
+                });
+
+        RestAdapter adapter = builder.build();
+
+        JiveService jiveService = adapter.create(JiveService.class);
+        Content content = new Content();
+        content.type = "idea";
+        content.subject = "Test";
+        Inners inners = new Inners();
+        inners.type = "text/utf8";
+        inners.text = "This is a test";
+        content.content = inners;
+        jiveService.postContent(content, new Callback<Void>() {
+
+            @Override
+            public void success(Void aVoid, retrofit.client.Response response) {
+                System.out.print("win");
             }
-        } else {
-        	logger.error("URL failed to summarize: "+topScoreToday.url);
-        }
 
-        
-
-        logger.info("Success");
-     }
+            @Override
+            public void failure(RetrofitError error) {
+                System.out.print("fail");
+            }
+        });
+    }
 }
