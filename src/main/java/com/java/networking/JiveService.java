@@ -1,12 +1,11 @@
 package com.java.networking;
 
-import com.java.model.Content;
-import com.java.model.InnerData;
-import retrofit.Callback;
+import java.util.Map;
+
 import retrofit.http.Body;
-import retrofit.http.GET;
 import retrofit.http.POST;
-import retrofit.http.Path;
+
+import com.java.model.Content;
 
 /**
  * Created by derlucci on 7/16/15.
@@ -14,6 +13,6 @@ import retrofit.http.Path;
 public interface JiveService {
 
     @POST("/api/core/v3/contents/")
-    void postContent(@Body Content stuff, Callback<Void> cb);
+    Map<String, Object> postContent(@Body Content stuff);
 
 }

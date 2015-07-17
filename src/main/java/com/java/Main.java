@@ -111,17 +111,6 @@ public class Main implements Runnable{
         inners.type = "text/utf8";
         inners.text = topScoreToday.url;
         content.content = inners;
-        jiveService.postContent(content, new Callback<Void>() {
-
-            @Override
-            public void success(Void aVoid, retrofit.client.Response response) {
-                logger.info("Success.");
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                logger.error(error.getMessage());
-            }
-        });
+        logger.debug("Response:\n"+jiveService.postContent(content));
     }
 }
