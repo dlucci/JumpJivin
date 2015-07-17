@@ -97,7 +97,6 @@ public class Main implements Runnable{
             data = data.concat(s + " ");
         }
 
-
         RestAdapter.Builder builder = new RestAdapter.Builder()
                 .setEndpoint(properties.getProperty(PROPERTIES_JIVE_ENDPOINT))
                 .setClient(new OkClient(new OkHttpClient())) // use OkHttp
@@ -128,6 +127,8 @@ public class Main implements Runnable{
         Inners inners = new Inners();
         inners.type = "text/html";
         inners.text = "<a href = \"" + topScoreToday.url + "\">" + data + "</a>";
+        String[] tags = PyTeaser.keywords;
+        content.tags = tags;
         content.content = inners;
         logger.debug("Response:\n" + jiveService.postContent(content));
     }

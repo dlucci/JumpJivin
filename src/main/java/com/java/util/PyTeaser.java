@@ -89,6 +89,8 @@ public class PyTeaser {
     final List<String> stopList = Arrays.asList(stopWords);
     // asList returns a fixed sized list, backed as a single array
 
+    public static String[] keywords;
+
     public List<String> SummarizeUrl(String url){
 
         Article article = grabLink(url);
@@ -113,6 +115,8 @@ public class PyTeaser {
 
         TreeMap<String, Double> keys = keywords(article);
         // consists of keys (string values) and values (double values)
+
+        keywords = keys.keySet().toArray(new String[keys.keySet().size()]);
 
         String[] titleWords = split_words(title);
 
@@ -320,7 +324,7 @@ public class PyTeaser {
         return count/goodTitle.size();
     }
 
-    private TreeMap<String, Double> keywords(String article) {
+    public TreeMap<String, Double> keywords(String article) {
     // takes in an article and scores the individual words
 
         String[] words = split_words(article);

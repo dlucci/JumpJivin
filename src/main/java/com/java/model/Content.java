@@ -10,5 +10,6 @@ public class Content {
     public String subject;
     public Inners content;
 	public String visibility;
+    public String[] tags;
 
 }
