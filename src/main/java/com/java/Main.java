@@ -84,9 +84,13 @@ public class Main implements Runnable{
         List<String> summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
 
         String data = new String();
-        if(summary == null){
-            topScoreToday = childrens.get(1).data;
-            summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
+        for(int x = 0 ; x < childrens.size(); x++){
+            if(summary == null){
+                topScoreToday = childrens.get(x).data;
+                summary = new PyTeaser().SummarizeUrl(topScoreToday.url);
+                continue;
+            } else
+                break;
         }
 
         for(String s : summary){
