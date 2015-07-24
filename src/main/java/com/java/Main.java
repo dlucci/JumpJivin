@@ -130,6 +130,7 @@ public class Main implements Runnable{
         String[] tags = PyTeaser.keywords;
         content.tags = tags;
         content.content = inners;
-        logger.debug("Response:\n" + jiveService.postContent(content));
+            logger.debug("Response:\n" + jiveService.postContent(content));
+
     }
 }
